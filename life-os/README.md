@@ -1,38 +1,34 @@
 # LIFE OS
 
-Starter do LIFE OS: Next.js + TypeScript + Tailwind CSS + Supabase.
+LIFE OS é um painel pessoal de organização construído com Next.js, TypeScript, Tailwind CSS e Supabase.
 
-## Requisitos
-- Node.js 20.9+
-- Projeto Supabase
+## Hospedagem: GitHub Pages
 
-## Rodar localmente
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
-Abra http://localhost:3000.
+O projeto está configurado para exportação estática (output: export). O GitHub Actions compila o site e publica a pasta out automaticamente.
 
-## Conectar o Supabase
+1. No repositório, abra **Settings → Pages**.
+2. Em **Build and deployment → Source**, selecione **GitHub Actions**.
+3. Faça um push na branch main; o workflow publica o site em https://mateusmiguel-dev.github.io/LifeOS-Code/.
+
+O build usa o diretório life-os, pois o código-fonte está nessa pasta do repositório.
+
+## Configurar o Supabase
+
 1. Crie um projeto em https://supabase.com/dashboard.
-2. Em Project Settings → API, copie Project URL e anon/public key.
-3. Preencha `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` no `.env.local`.
-4. No SQL Editor do Supabase, execute `supabase/migrations/0001_initial_schema.sql`.
-5. Reinicie o servidor.
+2. Em **Project Settings → API**, copie a Project URL e a chave **anon/public**.
+3. No repositório GitHub, abra **Settings → Secrets and variables → Actions → Variables**.
+4. Crie as variáveis:
+   - NEXT_PUBLIC_SUPABASE_URL
+   - NEXT_PUBLIC_SUPABASE_ANON_KEY
+5. Em **Authentication → URL Configuration** no Supabase, configure a URL do site e adicione https://mateusmiguel-dev.github.io/LifeOS-Code/** às Redirect URLs.
+6. No SQL Editor do Supabase, execute supabase/migrations/0001_initial_schema.sql.
 
-> Não coloque a `service_role` key em variáveis `NEXT_PUBLIC_*` nem no frontend.
+A chave anon/public é destinada ao cliente e deve ser protegida por políticas RLS. **Nunca publique a chave service_role**.
 
-## O que está pronto
-- Dashboard responsivo em dark mode.
-- Sidebar e navegação inicial.
-- Widgets de indicadores, tarefas, foco e hábitos (dados demonstrativos nos widgets ainda não conectados).
-- Tela de tarefas com criação, conclusão e exclusão.
-- Persistência de tarefas no Supabase quando as credenciais e a migration estiverem configuradas.
-- Schema inicial para tarefas, hábitos, registros de hábitos e metas, com RLS.
+## Desenvolvimento
 
-## Próximas entregas
-1. Supabase Auth (login, cadastro, recuperação de senha e proteção de rotas).
-2. CRUD de hábitos e metas + dashboard com métricas reais.
-3. Agenda, projetos, notas e financeiro.
-4. Busca global, notificações e revisão diária.
+Requer Node.js 20.9+ para executar localmente. A publicação normal é feita pelo GitHub Actions; não é necessário rodar o servidor no computador.
+
+## Observações da exportação estática
+
+GitHub Pages serve arquivos estáticos. Por isso, autenticação e acesso ao Supabase acontecem no navegador; não há middleware, API routes ou server actions no site hospedado.
