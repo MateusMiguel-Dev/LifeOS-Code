@@ -14,7 +14,7 @@ export function LoginForm() {
   async function submit(e:React.FormEvent){
     e.preventDefault();setMessage("");
     const sb=createClient();
-    if(!sb){setMessage("Configure as variáveis do Supabase no arquivo .env.local.");return;}
+    if(!sb){setMessage("Configure as variáveis NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY nas Variables do GitHub Actions.");return;}
     setBusy(true);
     const result=mode==="login"
       ? await sb.auth.signInWithPassword({email,password})
