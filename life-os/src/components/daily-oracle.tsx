@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { Sparkles, RotateCcw, CalendarDays, Eye } from "lucide-react";
 
 type DailyCard = {
@@ -76,7 +77,7 @@ export function DailyOracle() {
             </div>
           </div>
         ) : (
-          <div className="oracle-revealed" style={{["--oracle-color" as string]:drawn.color,["--oracle-glow" as string]:drawn.glow}}>
+          <div className="oracle-revealed" style={{"--oracle-color":drawn.color,"--oracle-glow":drawn.glow} as CSSProperties}>
             <div className="oracle-card-face">
               <div className="oracle-card-inner">
                 <div className="oracle-card-top"><span>{drawn.numeral}</span><span>✧</span></div>
