@@ -1,0 +1,32 @@
+name: Update LIFE OS Gamer Radar
+
+on:
+  schedule:
+    - cron: "0 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch RSS feeds
+        working-directory: life-os
+        run: node scripts/update-gamer-news.mjs
+      - name: Commit updated news
+        run: |
+          if git diff --quiet; then
+            echo "No gamer news changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add life-os/src/data/gamer-news.json
+          git commit -m "chore: refresh gamer radar"
+          git push
