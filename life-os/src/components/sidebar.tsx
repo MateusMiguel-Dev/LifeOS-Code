@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, CalendarDays, CheckSquare, CircleHelp, LayoutDashboard, Settings2, Target, Wallet, Repeat2, BookOpen, Bell, Gamepad2 } from "lucide-react";
+import { CalendarDays, CheckSquare, LayoutDashboard, Target, Wallet, Repeat2, BookOpen, Bell, Gamepad2 } from "lucide-react";
 
 const primary = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -14,8 +14,7 @@ const primary = [
 const more = [
   { href: "/finance", label: "Financeiro", icon: Wallet },
   { href: "/notes", label: "Anotações", icon: BookOpen },
-  { href: "/insights", label: "Insights", icon: Activity },
-  { href: "/gamer", label: "Radar Gamer", icon: Gamepad2 },
+  { href: "/dashboard#radar-gamer", label: "Radar Gamer", icon: Gamepad2 },
 ];
 export function Sidebar() {
   const pathname = usePathname();
@@ -25,9 +24,6 @@ export function Sidebar() {
     <nav>{primary.map(item => <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`}><item.icon size={16}/>{item.label}</Link>)}</nav>
     <div className="nav-label">PERSONAL</div>
     <nav>{more.map(item => <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`}><item.icon size={16}/>{item.label}</Link>)}</nav>
-    <div className="sidebar-bottom">
-      <Link href="/settings" className="nav-link"><Settings2 size={16}/>Configurações</Link>
-      <div className="nav-link"><CircleHelp size={16}/>Central de ajuda</div>
-    </div>
+
   </aside>;
 }
