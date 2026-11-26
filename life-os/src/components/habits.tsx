@@ -40,5 +40,5 @@ export function Habits(){
   <div className="panel" style={{marginTop:14}}><div className="panel-head"><div><div className="panel-title">Seu ritual de hoje</div><div className="panel-hint">{entries.length} de {habits.length} hábitos concluídos</div></div><Repeat2 size={16}/></div>
   {loading?<div className="empty">Carregando hábitos...</div>:habits.length?habits.map(h=><div className="task-row" key={h.id}><button className={entries.some(e=>e.habit_id===h.id)?"task-check done":"task-check"} onClick={()=>toggle(h)}>{entries.some(e=>e.habit_id===h.id)&&<Check size={12}/>}</button><div style={{flex:1}}><div className="task-name">{h.name}</div><div className="panel-hint">{h.frequency==="daily"?"Todos os dias":h.frequency==="weekdays"?"Dias úteis":"Semanal"}</div></div><button className="ghost-btn" onClick={()=>archive(h)}>Arquivar</button></div>):<div className="empty">Adicione seu primeiro hábito para começar a acompanhar a consistência.</div>}
   {message&&<p style={{padding:12,fontSize:10,color:"#e6a66b"}}>{message}</p>}
- </div>;
+ </div></div>;
 }
