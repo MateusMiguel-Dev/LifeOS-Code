@@ -7,16 +7,8 @@ import type { Task } from "@/types/database";
 import { DailyOracle } from "@/components/daily-oracle";
 import { GamerRadar } from "@/components/gamer-radar";
 
-const demoTasks: Task[] = [
-  {id:"demo-1",title:"Planejar prioridades da semana",priority:"high",completed:false},
-  {id:"demo-2",title:"Finalizar leitura — 20 páginas",priority:"medium",completed:false},
-  {id:"demo-3",title:"Organizar espaço de trabalho",priority:"low",completed:true},
-  {id:"demo-4",title:"Revisar planejamento financeiro",priority:"medium",completed:false},
-];
-const habits = [{name:"Leitura",done:5,total:7},{name:"Exercício físico",done:4,total:5},{name:"Acordar cedo",done:6,total:7}];
-
 export function Dashboard() {
-  const [tasks,setTasks] = useState<Task[]>(demoTasks);
+  const [tasks,setTasks] = useState<Task[]>([]);
   const [connected,setConnected] = useState(false);
   const [loading,setLoading] = useState(true);
   const completed = tasks.filter(t=>t.completed).length;
@@ -50,8 +42,8 @@ export function Dashboard() {
     <section className="stat-grid">
       <Stat icon={<ListTodo size={16}/>} label="Tarefas pendentes" value={String(pending).padStart(2,"0")} note="No seu radar hoje"/>
       <Stat icon={<CheckCircle2 size={16}/>} label="Concluídas" value={String(completed).padStart(2,"0")} note="Pequenos avanços contam"/>
-      <Stat icon={<Flame size={16}/>} label="Consistência" value="86%" note="Média ilustrativa semanal"/>
-      <Stat icon={<Target size={16}/>} label="Metas ativas" value="03" note="Objetivos em andamento"/>
+      <Stat icon={<Flame size={16}/>} label="Consistência" value="—" note="Acompanhe seus hábitos"/>
+      <Stat icon={<Target size={16}/>} label="Metas ativas" value="—" note="Cadastre seus objetivos"/>
     </section>
     <section className="content-grid">
       <div>
@@ -75,9 +67,10 @@ export function Dashboard() {
           <div style={{marginTop:18}}><div className="progress-track"><div className="progress-fill" style={{width:`${Math.min(100,completed/Math.max(1,tasks.length)*100)}%`}}/></div></div>
           <div style={{fontSize:10,color:"#9ba2ac",marginTop:8}}>{completed} de {tasks.length} tarefas concluídas</div>
         </div>
-        <div className="panel section-gap">
-          <div className="panel-head"><div><div className="panel-title">Hábitos em destaque</div><div className="panel-hint">Sua semana até agora</div></div><Clock3 size={15} color="#aeb5bf"/></div>
-          {habits.map(h=><div className="habit-item" key={h.name}><div className="habit-line"><span>{h.name}</span><span style={{color:"#d5dae1"}}>{h.done}/{h.total}</span></div><div className="progress-track"><div className="progress-fill" style={{width:`${h.done/h.total*100}%`}}/></div><div className="habit-days">{["S","T","Q","Q","S","S","D"].map((d,i)=><span key={i} className={`habit-day ${i<h.done?"done":""}`}>{d}</span>)}</div></div>)}
+        <div className="panel section-gap" style={{padding:16}}>
+          <div className="panel-title">Construa sua consistência</div>
+          <div className="panel-hint" style={{marginTop:5}}>Registre seus hábitos e acompanhe cada dia concluído.</div>
+          <Link href="/habits" className="ghost-btn" style={{display:"inline-flex",marginTop:13,textDecoration:"none"}}>Abrir hábitos <ArrowUpRight size={13}/></Link>
         </div>
       </div>
     </section>
