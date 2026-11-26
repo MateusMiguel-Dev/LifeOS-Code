@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, CheckCircle2, Clock3, Flame, ListTodo, Plus, Spark
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Task } from "@/types/database";
+import { DailyOracle } from "@/components/daily-oracle";
 
 const demoTasks: Task[] = [
   {id:"demo-1",title:"Planejar prioridades da semana",priority:"high",completed:false},
@@ -44,6 +45,7 @@ export function Dashboard() {
       </div>
       <div className="welcome-art" aria-hidden="true"><div className="orb orb-one"/><div className="orb orb-two"/><div className="orb-core"/></div>
     </section>
+    <DailyOracle />
     <section className="stat-grid">
       <Stat icon={<ListTodo size={16}/>} label="Tarefas pendentes" value={String(pending).padStart(2,"0")} note="No seu radar hoje"/>
       <Stat icon={<CheckCircle2 size={16}/>} label="Concluídas" value={String(completed).padStart(2,"0")} note="Pequenos avanços contam"/>
