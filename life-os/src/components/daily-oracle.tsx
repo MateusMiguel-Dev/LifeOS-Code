@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Sparkles, RotateCcw, CalendarDays, Eye } from "lucide-react";
 
 type DailyCard = {
@@ -30,25 +31,73 @@ export function DailyOracle() {
   const [drawn, setDrawn] = useState<DailyCard | null>(null);
   const [history, setHistory] = useState<SavedDraw[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const date = localDateKey();
     setToday(date);
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as SavedDraw[];
-      setHistory(saved);
-      const current = saved.find((item) => item.date === date);
-      if (current) setDrawn(deck.find((card) => card.id === current.id) || null);
-    } catch { setHistory([]); }
+    async function loadDraws() {
+      const db = createClient();
+      if (db) {
+        const { data: userData } = await db.auth.getUser();
+        if (userData.user) {
+          setSyncing(true);
+          const { data, error } = await db.from("oracle_draws").select("draw_date,card_id").order("draw_date",{ascending:false}).limit(90);
+          if (active && !error && data) {
+            const saved = data.map((item) => ({ date: item.draw_date, id: item.card_id })) as SavedDraw[];
+            setHistory(saved);
+            const current = saved.find((item) => item.date === date);
+            if (current) setDrawn(deck.find((card) => card.id === current.id) || null);
+            setSyncing(false);
+            return;
+          }
+          if (active) setSyncing(false);
+        }
+      }
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "[]") as SavedDraw[];
+        if (!active) return;
+        setHistory(saved);
+        const current = saved.find((item) => item.date === date);
+        if (current) setDrawn(deck.find((card) => card.id === current.id) || null);
+      } catch { if (active) setHistory([]); }
+    }
+    void loadDraws();
+    return () => { active = false; };
   }, []);
 
-  function drawCard() {
-    if (!today || drawn) return;
+  async function drawCard() {
+    if (!today || drawn || saving) return;
+    setSaving(true);
     const card = deck[Math.floor(Math.random() * deck.length)];
+    const db = createClient();
+    if (db) {
+      const { data: userData } = await db.auth.getUser();
+      if (userData.user) {
+        const { error } = await db.from("oracle_draws").insert({ draw_date: today, card_id: card.id });
+        if (error) {
+          const { data } = await db.from("oracle_draws").select("draw_date,card_id").eq("draw_date",today).maybeSingle();
+          if (data) {
+            setDrawn(deck.find((entry) => entry.id === data.card_id) || card);
+            setSaving(false);
+            return;
+          }
+          setSaving(false);
+          return;
+        }
+        setDrawn(card);
+        setHistory((current) => [{date:today,id:card.id},...current.filter((item)=>item.date!==today)].slice(0,90));
+        setSaving(false);
+        return;
+      }
+    }
     const next = [{ date: today, id: card.id }, ...history.filter((item) => item.date !== today)].slice(0, 90);
     setDrawn(card);
     setHistory(next);
     try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* storage may be unavailable */ }
+    setSaving(false);
   }
 
   const historyCards = history.filter((item) => item.date !== today).slice(0, 7);
@@ -72,7 +121,7 @@ export function DailyOracle() {
               <span className="oracle-date">{today ? new Intl.DateTimeFormat("pt-BR",{day:"numeric",month:"long",year:"numeric"}).format(new Date(today + "T12:00:00")) : "Seu momento de hoje"}</span>
               <h3>O que o dia tem a revelar?</h3>
               <p>Respire fundo, escolha estar presente e revele sua carta.</p>
-              <button className="oracle-draw-button" onClick={drawCard} disabled={!today}><Sparkles size={15}/> Tirar minha carta</button>
+              <button className="oracle-draw-button" onClick={drawCard} disabled={!today||saving}><Sparkles size={15}/> {saving?"Registrando...":"Tirar minha carta"}</button>
               <span className="oracle-once"><Eye size={12}/> Uma tiragem por dia</span>
             </div>
           </div>
@@ -98,6 +147,7 @@ export function DailyOracle() {
         )}
       </div>
       {showHistory && <div className="oracle-history"><strong>Cartas anteriores</strong>{historyCards.length ? historyCards.map((item) => { const card=deck.find((entry)=>entry.id===item.id); return card ? <div className="oracle-history-row" key={item.date}><span style={{color:card.color}}>{card.symbol}</span><span>{card.name}</span><time>{new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"short"}).format(new Date(item.date + "T12:00:00"))}</time></div> : null; }) : <p>Suas cartas anteriores aparecerão aqui depois da primeira tiragem.</p>}</div>}
+      {syncing&&<div className="oracle-footnote">Sincronizando seu histórico...</div>}
       <div className="oracle-footnote">As cartas são convites à reflexão e ao autoconhecimento — não previsões do futuro.</div>
     </section>
   );
