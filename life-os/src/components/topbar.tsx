@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 
 const notifiedKey = "lifeos-notified-reminders-v1";
 
+function decodeVapidKey(value:string){const padding="=".repeat((4-value.length%4)%4);const raw=atob((value+padding).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(raw,(char)=>char.charCodeAt(0));}
+
 export function Topbar() {
   const [date,setDate]=useState("");
   const [permission,setPermission]=useState<NotificationPermission|"unsupported">("unsupported");
@@ -15,6 +17,7 @@ export function Topbar() {
   useEffect(()=>{
     setDate(new Intl.DateTimeFormat("pt-BR",{weekday:"long",day:"2-digit",month:"long"}).format(new Date()));
     if("Notification" in window) setPermission(Notification.permission);
+    if("serviceWorker" in navigator) void navigator.serviceWorker.register(`${process.env.NEXT_PUBLIC_BASE_PATH||""}/sw.js`).catch(()=>{});
     const check=async()=>{
       const db=createClient();
       if(!db)return;
@@ -40,7 +43,26 @@ export function Topbar() {
     if(!("Notification" in window)){setNotice("Este navegador não oferece notificações.");return;}
     const result=await Notification.requestPermission();
     setPermission(result);
-    setNotice(result==="granted"?"Notificações ativadas enquanto o LIFE OS estiver aberto.":result==="denied"?"Permissão bloqueada nas configurações do navegador.":"Permissão não concedida.");
+    if(result!=="granted"){setNotice(result==="denied"?"Permissão bloqueada nas configurações do navegador.":"Permissão não concedida.");return;}
+    if("serviceWorker" in navigator){
+      try{
+        const registration=await navigator.serviceWorker.register(`${process.env.NEXT_PUBLIC_BASE_PATH||""}/sw.js`);
+        const vapid=process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        const db=createClient();
+        if(vapid&&db){
+          const {data:userData}=await db.auth.getUser();
+          if(userData.user){
+            const subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeVapidKey(vapid)});
+            const json=subscription.toJSON();
+            const {error}=await db.from("push_subscriptions").upsert({user_id:userData.user.id,endpoint:json.endpoint,p256dh:json.keys?.p256dh,auth:json.keys?.auth},{onConflict:"endpoint"});
+            if(error)throw error;
+            setNotice("Notificações push configuradas neste dispositivo.");
+            return;
+          }
+        }
+        setNotice("Notificações ativadas enquanto o LIFE OS estiver aberto. Push com o site fechado depende da configuração VAPID e do serviço Supabase.");
+      }catch(error){setNotice(error instanceof Error?error.message:"Não foi possível configurar push neste navegador.");}
+    }else setNotice("Notificações ativadas enquanto o LIFE OS estiver aberto.");
   }
 
   return <header className="topbar">
