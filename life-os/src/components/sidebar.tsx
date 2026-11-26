@@ -1,19 +1,21 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, CalendarDays, CheckSquare, CircleHelp, LayoutDashboard, Settings2, Target, Wallet, Repeat2, BookOpen } from "lucide-react";
+import { Activity, CalendarDays, CheckSquare, CircleHelp, LayoutDashboard, Settings2, Target, Wallet, Repeat2, BookOpen, Bell, Gamepad2 } from "lucide-react";
 
 const primary = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tasks", label: "Tarefas", icon: CheckSquare },
   { href: "/habits", label: "Hábitos", icon: Repeat2 },
-  { href: "/calendar", label: "Agenda", icon: CalendarDays },
+  { href: "/calendar", label: "Calendário", icon: CalendarDays },
+  { href: "/reminders", label: "Lembretes", icon: Bell },
   { href: "/goals", label: "Metas", icon: Target },
 ];
 const more = [
   { href: "/finance", label: "Financeiro", icon: Wallet },
   { href: "/notes", label: "Anotações", icon: BookOpen },
   { href: "/insights", label: "Insights", icon: Activity },
+  { href: "/gamer", label: "Radar Gamer", icon: Gamepad2 },
 ];
 export function Sidebar() {
   const pathname = usePathname();
