@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Task } from "@/types/database";
 import { DailyOracle } from "@/components/daily-oracle";
+import { GamerRadar } from "@/components/gamer-radar";
 
 const demoTasks: Task[] = [
   {id:"demo-1",title:"Planejar prioridades da semana",priority:"high",completed:false},
@@ -80,6 +81,7 @@ export function Dashboard() {
         </div>
       </div>
     </section>
+    <GamerRadar />
     {!connected&&<p style={{fontSize:10,color:"#858d98",marginTop:18}}>Modo de demonstração · Configure o Supabase para sincronizar seus dados.</p>}
   </div>;
 }
